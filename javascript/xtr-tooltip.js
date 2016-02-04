@@ -75,16 +75,16 @@ function XtrTooltip(id,direction){
 			boundingElement = this.getBoundingClientRect();
 			boundingTooltip = xtrTooltip.getBoundingClientRect();
 			if(direction == "right"){
-				moveX = boundingElement.left - boundingTooltip.width;
-				moveY = boundingElement.top + boundingElement.height/3;
+				moveX = boundingElement.left - boundingTooltip.width - 10;
+				moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
 			}
 			else if(direction == "left"){
-				moveX = boundingElement.right;
-				moveY = boundingElement.top - boundingTooltip.height/2;
+				moveX = boundingElement.right + 10;
+				moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
 			}
 			else if(direction == "top"){
-				moveX = event.clientX - boundingTooltip.width/2;
-				moveY = event.clientY + 20;
+				moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
+				moveY = boundingElement.bottom + 10;
 			}
 
 			moveX += XtrGraficoUtil.isset(offset.x) ? offset.x : 0;
