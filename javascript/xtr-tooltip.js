@@ -1,11 +1,12 @@
-function XtrTooltip(id){
+function XtrTooltip(id,direction){
 	var tooltipId;
 	var xtrTooltipElement;
 	var xtrTooltip;
 	var tooltipArrow;
 
 	var defaultClass;
-	var direction;
+	
+
 
 	tooltipId = XtrGraficoUtil.isset(id) ? id : "xtrTooltip";
 
@@ -18,13 +19,14 @@ function XtrTooltip(id){
 		document.body.appendChild(xtrTooltip);
 	}
 
-	direction = "right";
+	direction = XtrGraficoUtil.isset(direction) ? direction : "left";
 	defaultClass = "xtrTooltip-"+direction;
 	xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass);
 
 	this.addTrigger = addTrigger;
 	this.setDirection = setDirection;
-	
+	this._ = xtrTooltip;
+
 	return this;
 
 	function setDirection(type){
@@ -34,7 +36,7 @@ function XtrTooltip(id){
 		defaultClass = "xtrTooltip-"+direction;
 		xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass);
 	}	
-	function addTrigger(triggerObject){
+	function addTrigger(triggerId,triggerObject){
 		var triggerId;
 		var triggerElement;
 
@@ -46,9 +48,6 @@ function XtrTooltip(id){
 		var boundingElement,boundingTooltip;
 
 		if(XtrGraficoUtil.isobj(triggerObject)){
-			if(XtrGraficoUtil.isset(triggerObject.id)){
-				triggerId = triggerObject.id;
-			}
 			HTML = triggerObject.content;
 			if(XtrGraficoUtil.isobj(triggerObject.offset))
 				offset = triggerObject.offset;
@@ -60,10 +59,6 @@ function XtrTooltip(id){
 				offset = {};
 			}
 		}
-		else if(XtrGraficoUtil.isset(triggerObject)){
-			triggerId = triggerObject;
-		}
-
 		if(triggerId instanceof Node)
 			triggerElement = triggerId;
 		else
@@ -73,16 +68,19 @@ function XtrTooltip(id){
 			console.warn("XtrTooltip, trigger id does not exist");
 			return;
 		}
-
 		triggerElement.addEventListener("mouseover",function(event){
 
 			xtrTooltip.innerHTML = HTML;
 
 			boundingElement = this.getBoundingClientRect();
 			boundingTooltip = xtrTooltip.getBoundingClientRect();
-			if(direction == "left"){
+			if(direction == "right"){
 				moveX = boundingElement.left - boundingTooltip.width;
 				moveY = boundingElement.top + boundingElement.height/3;
+			}
+			else if(direction == "left"){
+				moveX = boundingElement.right;
+				moveY = boundingElement.top - boundingTooltip.height/2;
 			}
 			else if(direction == "top"){
 				moveX = event.clientX - boundingTooltip.width/2;
