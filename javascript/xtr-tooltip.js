@@ -88,7 +88,7 @@ function XtrTooltip(id,direction){
 			}
 			else if(direction == "bottom"){
 				moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
-				moveY = boundingElement.top - 10;
+				moveY = boundingElement.top - boundingTooltip.height - 10;
 			}
 
 			moveX += XtrGraficoUtil.isset(offset.x) ? offset.x : 0;
