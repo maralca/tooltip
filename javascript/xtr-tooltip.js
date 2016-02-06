@@ -90,6 +90,9 @@ function XtrTooltip(id,direction){
 			moveX += XtrGraficoUtil.isset(offset.x) ? offset.x : 0;
 			moveY += XtrGraficoUtil.isset(offset.y) ? offset.y : 0;
 
+			moveX += "px";
+			moveY += "px";
+
 			xtrTooltip.style.setProperty("left",moveX);
 			xtrTooltip.style.setProperty("top",moveY);
 
