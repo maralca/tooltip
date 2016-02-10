@@ -1,124 +1,154 @@
 function XtrTooltip(id,direction){
-	var tooltipId;
-	var xtrTooltipElement;
-	var xtrTooltip;
-	var tooltipArrow;
+	var tooltip;
+	var direcao;
 
-	var defaultClass;
-	
+	id = id || "xtrTooltip";
+	direcao = direction || "direita"
 
-
-	tooltipId = XtrGraficoUtil.isset(id) ? id : "xtrTooltip";
-
-	var count = 0;
-
-	xtrTooltip = document.getElementById(tooltipId);
-
-	if(xtrTooltip == null){
-		xtrTooltip = document.createElement("div");
-		xtrTooltip.setAttribute("id",tooltipId);
-		document.body.appendChild(xtrTooltip);
+	tooltip = document.getElementById(id);
+	if(tooltip == null){
+		tooltip = document.createElement("div");
+		tooltip.setAttribute("id",id);
+		tooltip.setAttribute("class","xtr tooltip "+direcao);
+		document.body.appendChild(tooltip);
+		tooltip.direction = direcao;
 	}
 
-	direction = XtrGraficoUtil.isset(direction) ? direction : "left";
-	defaultClass = "xtrTooltip-"+direction;
-	xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass);
+	tooltip.addTrigger = addTrigger;
 
-	this.addTrigger = addTrigger;
-	this.setDirection = setDirection;
-	this._ = xtrTooltip;
+	return tooltip;
 
-	return this;
+	function moverTooltipDe(element){
+		var boundingElement;
+		var boundingTooltip;
 
-	function setDirection(type){
-		if(!XtrGraficoUtil.isset(type))
-			return;
-		direction = type;
-		defaultClass = "xtrTooltip-"+direction;
-		xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass);
-	}	
-	function addTrigger(triggerselector,triggerObject){
-		var triggerId;
+		var moveX;
+		var moveY;
+
+		var offsetX;
+		var offsetY;
+
+		offsetX = element.tooltip[id].offsetX;
+		offsetY = element.tooltip[id].offsetY;
+
+		boundingElement = element.getBoundingClientRect();
+		boundingTooltip = tooltip.getBoundingClientRect();
+
+
+		if(direcao.indexOf("direita") >= 0){
+			moveX = boundingElement.left - boundingTooltip.width - 10;
+			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
+		}
+		else if(direcao.indexOf("esquerda") >= 0){
+			moveX = boundingElement.right + 10;
+			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
+		}
+		else if(direcao.indexOf("cima") >= 0){
+			moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
+			moveY = boundingElement.bottom + 10;
+		}
+		else if(direcao.indexOf("baixo") >= 0){
+			moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
+			moveY = boundingElement.top - boundingTooltip.height - 10;
+		}
+
+		moveX += offsetX || 0;
+		moveY += offsetY || 0;
+
+		moveX += "px";
+		moveY += "px";
+
+		tooltip.style.setProperty("left",moveX,"important");
+		tooltip.style.setProperty("top",moveY,"important");
+	}
+	function removerTooltip(){
+		tooltip.style = "";
+	}
+
+	function escreverTooltipDe(element){
+		var conteudo;
+
+		conteudo = element.tooltip[id].content;
+
+		tooltip.innerHTML = conteudo;
+	}
+	function apagarTooltip(){
+		tooltip.innerHTML = "";
+	}
+
+	function mostrarTooltip(){
+		tooltip.className += " mostrar";
+	}
+	function esconderTooltip(){	
+		XtrGraficoUtil.removeClass(tooltip,"mostrar");
+	}
+	function gatilhoMostrar(element){
+		var evento;
+
+		evento = element.tooltip[id].showOn;
+
+		element.addEventListener(evento,function(){
+			escreverTooltipDe(this);
+			mostrarTooltip();
+			moverTooltipDe(this);
+		});
+	}
+	function gatilhoEsconder(element){
+		var evento;
+
+		evento = element.tooltip[id].hideOn;
+
+		element.addEventListener(evento,function(){
+			removerTooltip();
+			apagarTooltip();
+			esconderTooltip();
+		});
+	}
+
+	function addTrigger(triggerSelector,triggerObject){
 		var triggerElement;
 
-		var HTML;
+		var conteudo;
 		var offset;
+		var eventoMostrar;
+		var eventoEsconder;
 
 		var moveX,moveY;
 
 		var boundingElement,boundingTooltip;
 
-		if(XtrGraficoUtil.isobj(triggerObject)){
-			HTML = triggerObject.content;
-			if(XtrGraficoUtil.isobj(triggerObject.offset))
-				offset = triggerObject.offset;
-			else if(XtrGraficoUtil.isset(offset)){
-				offset.x = offset;
-				offset.y = offset.x;
-			}
-			else{
-				offset = {};
-			}
-		}
-		if(triggerselector instanceof Node){
-			triggerElements = triggerselector;
-			triggerElement = triggerselector;
-			exception = true;
-		}
-		else{
-			exception = false;
-			triggerElements = document.querySelectorAll(triggerselector);
-		}
+		conteudo = triggerObject.content || triggerObject;
 
-		if(triggerElements == null){
+		triggerObject.offset = XtrGraficoUtil.isset(triggerObject.offset) ? triggerObject.offset : 0;
+
+		offsetY = triggerObject.offset.y || triggerObject.offset || 0;
+		offsetX = triggerObject.offset.x || triggerObject.offset || 0;
+
+		triggerElements = XtrGraficoUtil.toNodes(triggerSelector);
+
+		eventoMostrar  = triggerObject.show || triggerObject.showOn || triggerObject.showEvent || "mouseover";
+		eventoEsconder = triggerObject.hide || triggerObject.hideOn || triggerObject.hideEvent || "mouseout";
+
+		if(triggerElements.length == 0){
 			console.warn("XtrTooltip, trigger id does not exist");
 			return;
-		}
-		
-		for(triggerElementIndex = 0; triggerElements.length > triggerElementIndex || exception; triggerElementIndex++){
-			if(!exception)
-				triggerElement = triggerElements[triggerElementIndex];
-			exception = false;
+		};
+		for(triggerElementIndex = 0; triggerElements.length > triggerElementIndex; triggerElementIndex++){	
+			triggerElement = triggerElements[triggerElementIndex];
+			if(!XtrGraficoUtil.isobj(triggerElement.tooltip)){
+				triggerElement.tooltip = {};
+			}
 
-			triggerElement.addEventListener("mouseover",function(event){
-
-				xtrTooltip.innerHTML = HTML;
-
-				boundingElement = this.getBoundingClientRect();
-				boundingTooltip = xtrTooltip.getBoundingClientRect();
-				if(direction == "right"){
-					moveX = boundingElement.left - boundingTooltip.width - 10;
-					moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
-				}
-				else if(direction == "left"){
-					moveX = boundingElement.right + 10;
-					moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
-				}
-				else if(direction == "top"){
-					moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
-					moveY = boundingElement.bottom + 10;
-				}
-				else if(direction == "bottom"){
-					moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
-					moveY = boundingElement.top - boundingTooltip.height - 10;
-				}
-
-				moveX += XtrGraficoUtil.isset(offset.x) ? offset.x : 0;
-				moveY += XtrGraficoUtil.isset(offset.y) ? offset.y : 0;
-
-				moveX += "px";
-				moveY += "px";
-
-				xtrTooltip.style.setProperty("left",moveX);
-				xtrTooltip.style.setProperty("top",moveY);
-
-				xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass+" show");
-			});
-
-			triggerElement.addEventListener("mouseout",function(){
-				xtrTooltip.setAttribute("class","xtrTooltip "+defaultClass);
-				xtrTooltip.style = "";
-			});	
+			triggerElement.tooltip[id] = {
+				offsetX: offsetX,
+				offsetY: offsetY,
+				hideOn: eventoEsconder,
+				showOn: eventoMostrar,
+				content: conteudo
+			};
+			
+			gatilhoMostrar(triggerElement);
+			gatilhoEsconder(triggerElement);
 		}
 	}
 }
