@@ -37,19 +37,19 @@ function XtrTooltip(id,direction){
 
 		if(direcao.indexOf("direita") >= 0){
 			moveX = boundingElement.left - boundingTooltip.width - 10;
-			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
+			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2 + document.body.scrollTop;
 		}
 		else if(direcao.indexOf("esquerda") >= 0){
 			moveX = boundingElement.right + 10;
-			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2;
+			moveY = boundingElement.top + (boundingElement.height - boundingTooltip.height)/2 + document.body.scrollTop;
 		}
 		else if(direcao.indexOf("cima") >= 0){
 			moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
-			moveY = boundingElement.bottom + 10;
+			moveY = boundingElement.bottom + 10 + document.body.scrollTop;
 		}
 		else if(direcao.indexOf("baixo") >= 0){
 			moveX = boundingElement.left + (boundingElement.width - boundingTooltip.width)/2;
-			moveY = boundingElement.top - boundingTooltip.height - 10;
+			moveY = boundingElement.top - boundingTooltip.height - 10 + document.body.scrollTop;
 		}
 
 		moveX += offsetX || 0;
