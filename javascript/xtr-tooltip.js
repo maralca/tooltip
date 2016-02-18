@@ -100,8 +100,8 @@ function XtrTooltip(id,direction){
 
 		element.addEventListener(evento,function(){
 			removerTooltip();
-			apagarTooltip();
 			esconderTooltip();
+			apagarTooltip();
 		});
 	}
 
