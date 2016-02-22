@@ -1,9 +1,14 @@
-function XtrTooltip(id,direction){
+function XtrTooltip(id,kwargs){
 	var tooltip;
 	var direcao;
 
-	id = id || "xtrTooltip";
-	direcao = direction || "direita"
+	id = id || "xtrTooltip";	
+
+	direcao = kwargs || "direita";
+
+	if(XtrGraficoUtil.isobj(kwargs)){
+		direcao = kwargs.direction || "direita";
+	}
 
 	tooltip = document.getElementById(id);
 	if(tooltip == null){
@@ -15,6 +20,7 @@ function XtrTooltip(id,direction){
 	}
 
 	tooltip.addTrigger = addTrigger;
+	tooltip.removeTrigger = removeTrigger;
 
 	return tooltip;
 
@@ -86,23 +92,50 @@ function XtrTooltip(id,direction){
 		var evento;
 
 		evento = element.tooltip[id].showOn;
-
-		element.addEventListener(evento,function(){
+		fn = function(){
 			escreverTooltipDe(this);
 			mostrarTooltip();
 			moverTooltipDe(this);
-		});
+		};
+		element.tooltip[id].fnShowOn = fn;
+
+		element.addEventListener(evento,fn);
 	}
 	function gatilhoEsconder(element){
 		var evento;
+		var fn;
 
 		evento = element.tooltip[id].hideOn;
-
-		element.addEventListener(evento,function(){
+		fn = function(){
 			removerTooltip();
 			esconderTooltip();
 			apagarTooltip();
-		});
+		};
+		element.tooltip[id].fnHideOn = fn;
+
+		element.addEventListener(evento,fn);
+	}
+
+	function removeTrigger(triggerSelector){
+		var triggerElements,triggerElement;
+		var triggerElementIndex;
+
+		var eventShowOn,eventHideOn;
+		var fnShowOn,fnHideOn;
+
+		triggerElements = XtrGraficoUtil.toNodes(triggerSelector);
+		for(triggerElementIndex = 0; triggerElements.length > triggerElementIndex; triggerElementIndex++){	
+			triggerElement = triggerElements[triggerElementIndex];
+
+			eventShowOn = triggerElement.tooltip[id].showOn;
+			eventHideOn = triggerElement.tooltip[id].hideOn;
+
+			fnShowOn = triggerElement.tooltip[id].fnShowOn;
+			fnHideOn = triggerElement.tooltip[id].fnHideOn;
+
+			triggerElement.removeEventListener(eventShowOn,fnShowOn);
+			triggerElement.removeEventListener(eventHideOn,fnHideOn);
+		}
 	}
 
 	function addTrigger(triggerSelector,triggerObject){
